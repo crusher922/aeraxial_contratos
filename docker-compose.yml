@@ -1,6 +1,6 @@
 services:
   mariadb-contratos:
-    image: mariadb:11.2
+    image: mariadb:10.11
     container_name: mariadb-contratos
     environment:
       MARIADB_DATABASE: ms_contratos
@@ -8,7 +8,7 @@ services:
       MARIADB_PASSWORD: root
       MARIADB_ROOT_PASSWORD: root
     ports:
-      - "3306:3307"
+      - "3311:3306"
     volumes:
       - mariadb_contratos:/var/lib/mysql
 
