@@ -4,8 +4,8 @@ services:
     container_name: mariadb-contratos
     environment:
       MARIADB_DATABASE: ms_contratos
-      MARIADB_USER: root
-      MARIADB_PASSWORD: root
+      MARIADB_USER: contratos_user
+      MARIADB_PASSWORD: contratos_pass
       MARIADB_ROOT_PASSWORD: root
     ports:
       - "3311:3306"
