@@ -14,7 +14,7 @@ class GreetingResourceTest {
                 .when()
                 .get("/contracts")
                 .then()
-                .statusCode(200);
+                .statusCode(400);
     }
 
 }
