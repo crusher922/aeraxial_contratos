@@ -5,7 +5,6 @@ import com.aeraxial.masterdata.dto.CreatePartyRequest;
 import com.aeraxial.masterdata.dto.UpdatePartyRequest;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Link;
 import jakarta.ws.rs.core.MediaType;
 
 import java.awt.*;
@@ -89,6 +88,4 @@ public class PartyResource {
         p.legalRepresentative = req.legalRepresentative;
         return p;
     }
-
-
 }
