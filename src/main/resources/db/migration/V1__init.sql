@@ -129,7 +129,7 @@ CREATE TABLE leased_space (
   territorial_exclusivity CHAR(1) DEFAULT 'N',
   exclusivity_notes VARCHAR(2000),
 
-  UNIQUE KEY uq_space (client_id, space_code),
+  UNIQUE KEY uq_space (client_id, space_id),
   KEY idx_space_client (client_id),
   KEY idx_space_site (site_id),
 
