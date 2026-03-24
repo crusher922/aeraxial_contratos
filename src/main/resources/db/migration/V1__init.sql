@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS ms_contratos;
 USE ms_contratos;
 
 
-CREATE TABLE IF NOT EXISTS document_object (
+CREATE TABLE document_object (
   document_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
   client_id      BIGINT NOT NULL,
   site_id        BIGINT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS document_object (
   KEY idx_doc_sha (sha256)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS contract (
+CREATE TABLE contract (
   contract_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
   client_id        BIGINT NOT NULL,
   site_id          BIGINT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS contract (
   KEY idx_contract_dates (start_date, end_date)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS contract_version (
+CREATE TABLE contract_version (
   contract_version_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id         BIGINT NOT NULL,
   client_id           BIGINT NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS contract_version (
 -- =========================
 -- B) PARTES (LANDLORD/TENANT/OPERATOR/GUARANTOR)
 -- =========================
-CREATE TABLE IF NOT EXISTS party (
+CREATE TABLE party (
   party_id             BIGINT AUTO_INCREMENT PRIMARY KEY,
   client_id            BIGINT NOT NULL,
   party_type           VARCHAR(30) NOT NULL,          -- LANDLORD/TENANT/OPERATOR/GUARANTOR/OTHER
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS party (
   KEY idx_party_tax (tax_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS contract_party (
+CREATE TABLE contract_party (
   contract_party_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id       BIGINT NOT NULL,
   party_id          BIGINT NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS contract_party (
 -- C) ESPACIOS (si contratos los administran)
 -- Nota: si "espacios" son otro MS, aquí guardas solo referencia.
 -- =========================
-CREATE TABLE IF NOT EXISTS airport_location (
+CREATE TABLE airport_location (
   location_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
   client_id    BIGINT NOT NULL,
   site_id      BIGINT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS airport_location (
   KEY idx_loc_site (site_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS leased_space (
+CREATE TABLE leased_space (
   space_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
   client_id      BIGINT NOT NULL,
   site_id        BIGINT NULL,
@@ -129,14 +129,14 @@ CREATE TABLE IF NOT EXISTS leased_space (
   territorial_exclusivity CHAR(1) DEFAULT 'N',
   exclusivity_notes VARCHAR(2000),
 
-  UNIQUE KEY uq_space (client_id, space_code),
+  UNIQUE KEY uq_space (client_id, space_id),
   KEY idx_space_client (client_id),
   KEY idx_space_site (site_id),
 
   FOREIGN KEY (location_id) REFERENCES airport_location(location_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS contract_space (
+CREATE TABLE contract_space (
   contract_space_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id       BIGINT NOT NULL,
   space_id          BIGINT NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS contract_space (
 -- =========================
 -- D) ECONOMÍA
 -- =========================
-CREATE TABLE IF NOT EXISTS rent_base (
+CREATE TABLE rent_base (
   rent_base_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id    BIGINT NOT NULL,
   amount         DECIMAL(14,2),
@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS rent_base (
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS rent_variable (
+CREATE TABLE rent_variable (
   rent_variable_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id            BIGINT NOT NULL,
   percentage             DECIMAL(6,3),
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS rent_variable (
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS rent_escalation (
+CREATE TABLE rent_escalation (
   escalation_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id   BIGINT NOT NULL,
   formula       VARCHAR(1000),
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS rent_escalation (
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS security_deposit (
+CREATE TABLE security_deposit (
   deposit_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id BIGINT NOT NULL,
   amount     DECIMAL(14,2),
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS security_deposit (
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS additional_charges (
+CREATE TABLE additional_charges (
   charge_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id BIGINT NOT NULL,
   charge_type VARCHAR(30),        -- MAINTENANCE/UTILITIES/MARKETING/INSURANCE/OTHER
@@ -207,7 +207,7 @@ CREATE TABLE IF NOT EXISTS additional_charges (
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS payment_terms (
+CREATE TABLE payment_terms (
   payment_terms_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id      BIGINT NOT NULL,
   payment_method   VARCHAR(30),  -- TRANSFER/CARD/CASH/OTHER
@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS payment_terms (
 ) ENGINE=InnoDB;
 
 
-CREATE TABLE IF NOT EXISTS clause (
+CREATE TABLE clause (
   clause_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id  BIGINT NOT NULL,
   clause_type  VARCHAR(40) NOT NULL,
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS clause (
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS tenant_obligation (
+CREATE TABLE tenant_obligation (
   obligation_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id     BIGINT NOT NULL,
   obligation_type VARCHAR(40) NOT NULL, -- HOURS/MAINTENANCE/INSURANCE/PERMITS/OPS_STANDARDS
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS tenant_obligation (
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS insurance_required (
+CREATE TABLE insurance_required (
   ins_req_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id     BIGINT NOT NULL,
   insurance_type  VARCHAR(100) NOT NULL,
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS insurance_required (
 
 -- EXTRACCIÓN + EVIDENCIA + REVISIÓN + AUDITORÍA
 
-CREATE TABLE IF NOT EXISTS contract_field_def (
+CREATE TABLE contract_field_def (
   field_def_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
   client_id       BIGINT NOT NULL,
   field_key       VARCHAR(200) NOT NULL, -- term.start_date, economic.fixed_rent.amount, etc.
@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS contract_field_def (
   KEY idx_field_client (client_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS contract_field_value (
+CREATE TABLE contract_field_value (
   field_value_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_version_id  BIGINT NOT NULL,
   client_id            BIGINT NOT NULL,
@@ -294,7 +294,7 @@ CREATE TABLE IF NOT EXISTS contract_field_value (
   FOREIGN KEY (field_def_id) REFERENCES contract_field_def(field_def_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS evidence_snippet (
+CREATE TABLE evidence_snippet (
   evidence_id         BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_version_id BIGINT NOT NULL,
   field_value_id      BIGINT NOT NULL,
@@ -314,7 +314,7 @@ CREATE TABLE IF NOT EXISTS evidence_snippet (
   FOREIGN KEY (field_value_id) REFERENCES contract_field_value(field_value_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS review_task (
+CREATE TABLE review_task (
   task_id             BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_version_id BIGINT NOT NULL,
   client_id           BIGINT NOT NULL,
@@ -331,7 +331,7 @@ CREATE TABLE IF NOT EXISTS review_task (
   FOREIGN KEY (contract_version_id) REFERENCES contract_version(contract_version_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS review_action (
+CREATE TABLE review_action (
   action_id           BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_version_id BIGINT NOT NULL,
   field_value_id      BIGINT NOT NULL,
@@ -350,7 +350,7 @@ CREATE TABLE IF NOT EXISTS review_action (
   FOREIGN KEY (field_value_id) REFERENCES contract_field_value(field_value_id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS audit_log (
+CREATE TABLE audit_log (
   audit_id     BIGINT AUTO_INCREMENT PRIMARY KEY,
   client_id    BIGINT NOT NULL,
   entity_type  VARCHAR(50) NOT NULL,  -- CONTRACT, CONTRACT_VERSION, FIELD_VALUE, DOCUMENT...

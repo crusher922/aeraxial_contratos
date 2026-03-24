@@ -1,8 +1,8 @@
 package com.aeraxial.config;
 
+import io.quarkus.vertx.http.runtime.filters.Filters;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.quarkus.vertx.http.runtime.filters.Filters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 

@@ -27,6 +27,12 @@ public class ContractResource {
     }
 
     @GET
+    @Path("/all")
+    public List<Contract> getAll() {
+        return Contract.listAll();
+    }
+
+    @GET
     public List<Contract> search(@HeaderParam("X-Client-Id") String clientIdHeader,
                                  @QueryParam("status") String status) {
         long clientId = RequestContext.requireClientId(clientIdHeader);
