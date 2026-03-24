@@ -30,6 +30,11 @@ public class VersionService {
         }
         return v;
     }
+    public List<DocumentObject> getAllDocuments(long clientId) {
+        return DocumentObject
+                .find("clientId = ?1 order by createdAt desc", clientId)
+                .list();
+    }
 
     @Transactional
     public DocumentObject createDocument(long clientId, String actor, CreateDocumentRequest req) {
@@ -138,25 +143,25 @@ public class VersionService {
         return v;
     }
 
-    public List<DocumentObject> listDocuments(long clientId, Long siteId, String fileName) {
-        StringBuilder query = new StringBuilder("clientId = ?1");
-        java.util.List<Object> params = new java.util.ArrayList<>();
-        params.add(clientId);
-
-        if (siteId != null) {
-            query.append(" and siteId = ?").append(params.size() + 1);
-            params.add(siteId);
-        }
-
-        if (fileName != null && !fileName.isBlank()) {
-            query.append(" and lower(fileName) like ?").append(params.size() + 1);
-            params.add("%" + fileName.trim().toLowerCase() + "%");
-        }
-
-        query.append(" order by createdAt desc");
-
-        return DocumentObject.list(query.toString(), params.toArray());
-    }
+//    public List<DocumentObject> listDocuments(long clientId, Long siteId, String fileName) {
+//        StringBuilder query = new StringBuilder("clientId = ?1");
+//        java.util.List<Object> params = new java.util.ArrayList<>();
+//        params.add(clientId);
+//
+//        if (siteId != null) {
+//            query.append(" and siteId = ?").append(params.size() + 1);
+//            params.add(siteId);
+//        }
+//
+//        if (fileName != null && !fileName.isBlank()) {
+//            query.append(" and lower(fileName) like ?").append(params.size() + 1);
+//            params.add("%" + fileName.trim().toLowerCase() + "%");
+//        }
+//
+//        query.append(" order by createdAt desc");
+//
+//        return DocumentObject.list(query.toString(), params.toArray());
+//    }
 
     private static String esc(String s) {
         return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
