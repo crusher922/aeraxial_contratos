@@ -1,16 +1,105 @@
+# ============================================================================
+# AERAXIAL CONTRATOS — Docker Compose
+# ============================================================================
+#
+# Proyecto: aeraxial_contratos (Quarkus ms-contratos)
+# Puerto:   8082 (API REST + Swagger UI)
+#
+# Servicios:
+#   ms-contratos → Quarkus API (puerto 8082)
+#   mariadb      → Base de datos (puerto 3311)
+#   adminer      → Panel DB (puerto 8081, solo dev)
+#
+# Se conecta a la red aeraxial_net para que el backend Python
+# y el frontend puedan alcanzarlo.
+#
+# Uso:
+#   docker compose up -d                       → Levantar todo
+#   docker compose --profile dev up -d         → Con Adminer
+#   docker compose up -d --build ms-contratos  → Rebuild solo Quarkus
+#   docker compose logs -f ms-contratos        → Logs
+#
+# Endpoints:
+#   http://localhost:8082/q/swagger-ui   → Swagger UI
+#   http://localhost:8082/q/health       → Health check
+#   http://localhost:8082/openapi        → OpenAPI spec
+# ============================================================================
+
 services:
-  mariadb-contratos:
-    image: mariadb:10.11
-    container_name: mariadb-contratos
+
+  # ── MariaDB ─────────────────────────────────────────────────────────────────
+  mariadb:
+    image: mariadb:11.4
+    container_name: aeraxial_mariadb
+    restart: unless-stopped
     environment:
-      MARIADB_DATABASE: ms_contratos
-      MARIADB_USER: contratos_user
-      MARIADB_PASSWORD: contratos_pass
-      MARIADB_ROOT_PASSWORD: root
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+      MARIADB_DATABASE: ${DB_NAME:-ms_contratos}
+      MARIADB_USER: ${DB_USER:-contratos_user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-contratos_pass}
+    volumes:
+      - mariadb_data:/var/lib/mysql
     ports:
       - "3311:3306"
-    volumes:
-      - mariadb_contratos:/var/lib/mysql
+    networks:
+      - aeraxial_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
+  # ── Quarkus ms-contratos ────────────────────────────────────────────────────
+  ms-contratos:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: aeraxial_ms_contratos
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      # Override de application.properties para Docker
+      QUARKUS_HTTP_PORT: 8082
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:mariadb://mariadb:3306/${DB_NAME:-ms_contratos}
+      QUARKUS_DATASOURCE_USERNAME: ${DB_USER:-contratos_user}
+      QUARKUS_DATASOURCE_PASSWORD: ${DB_PASSWORD:-contratos_pass}
+      QUARKUS_FLYWAY_MIGRATE_AT_START: "true"
+      QUARKUS_FLYWAY_BASELINE_ON_MIGRATE: "true"
+    ports:
+      - "8082:8082"
+    networks:
+      - aeraxial_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/q/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── Adminer (solo dev) ──────────────────────────────────────────────────────
+  adminer:
+    image: adminer:4.8
+    container_name: aeraxial_contratos_adminer
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    ports:
+      - "8081:8080"
+    networks:
+      - aeraxial_net
+    profiles:
+      - dev
+
+# ── Red compartida con los otros proyectos ──────────────────────────────────
+networks:
+  aeraxial_net:
+    name: aeraxial_net
+    driver: bridge
+
+# ── Volúmenes ────────────────────────────────────────────────────────────────
 volumes:
-  mariadb_contratos:
+  mariadb_data:
+    name: aeraxial_mariadb_data
