@@ -31,13 +31,21 @@ public class VersionResource {
         String actor = RequestContext.actorOrSystem(actorHeader);
         return service.createDocument(clientId, actor, req);
     }
+//    @GET
+//    @Path("/documents")
+//    public List<DocumentObject> listDocuments(@HeaderParam("X-Client-Id") String clientIdHeader,
+//                                              @QueryParam("siteId") Long siteId,
+//                                              @QueryParam("fileName") String fileName) {
+//        long clientId = RequestContext.requireClientId(clientIdHeader);
+//        return service.listDocuments(clientId, siteId, fileName);
+//    }
     @GET
     @Path("/documents")
-    public List<DocumentObject> listDocuments(@HeaderParam("X-Client-Id") String clientIdHeader,
-                                              @QueryParam("siteId") Long siteId,
-                                              @QueryParam("fileName") String fileName) {
+    public List<DocumentObject> getAllDocuments(
+            @HeaderParam("X-Client-Id") String clientIdHeader
+    ) {
         long clientId = RequestContext.requireClientId(clientIdHeader);
-        return service.listDocuments(clientId, siteId, fileName);
+        return service.getAllDocuments(clientId);
     }
 
     // ---- Versiones por contrato ----
