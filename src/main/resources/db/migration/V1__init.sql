@@ -37,7 +37,7 @@ CREATE TABLE contract (
   created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME NULL,
 
-  UNIQUE KEY uq_contract (client_id, contract_number),
+  UNIQUE KEY uq_contract (client_id, contract_id),
   KEY idx_contract_client (client_id, status),
   KEY idx_contract_dates (start_date, end_date)
 ) ENGINE=InnoDB;
@@ -59,7 +59,7 @@ CREATE TABLE contract_version (
   created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by          VARCHAR(120) NULL,
 
-  UNIQUE KEY uq_contract_ver (contract_id, version_number),
+  UNIQUE KEY uq_contract_ver (contract_id, contract_version_id),
   KEY idx_cv_contract (contract_id, version_number),
   KEY idx_cv_client (client_id, pipeline_status),
 
@@ -93,7 +93,7 @@ CREATE TABLE contract_party (
   contract_party_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   contract_id       BIGINT NOT NULL,
   party_id          BIGINT NOT NULL,
-  role              VARCHAR(30) NOT NULL,      -- LANDLORD/TENANT/OPERATOR/GUARANTOR
+  role              VARCHAR(300) NOT NULL,      -- LANDLORD/TENANT/OPERATOR/GUARANTOR
   is_primary        CHAR(1) DEFAULT 'N',
   KEY idx_cp_contract (contract_id),
   FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
