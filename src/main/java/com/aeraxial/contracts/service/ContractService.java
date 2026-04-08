@@ -17,13 +17,25 @@ public class ContractService {
 
     @Transactional
     public Contract create(long clientId, String actor, CreateContractRequest req) {
-        // Validación básica de negocio
+
         if (req.startDate != null && req.endDate != null && req.endDate.isBefore(req.startDate)) {
             throw new WebApplicationException("endDate cannot be before startDate", Response.Status.BAD_REQUEST);
         }
 
-        // Unicidad por clientId + contractNumber
-        Contract existing = Contract.find("clientId = ?1 and contractNumber = ?2", clientId, req.contractNumber).firstResult();
+        // 🔥 FIX AQUÍ
+        String contractNumber = req.contractNumber;
+
+        if (contractNumber == null || contractNumber.isBlank() || "UNKNOWN".equalsIgnoreCase(contractNumber)) {
+            contractNumber = "UNKNOWN-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        }
+
+        // 🔥 VALIDAS CON EL NUEVO VALOR
+        Contract existing = Contract.find(
+                "clientId = ?1 and contractNumber = ?2",
+                clientId,
+                contractNumber
+        ).firstResult();
+
         if (existing != null) {
             throw new WebApplicationException("Contract number already exists for this client", Response.Status.CONFLICT);
         }
@@ -31,7 +43,7 @@ public class ContractService {
         Contract c = new Contract();
         c.clientId = clientId;
         c.siteId = req.siteId;
-        c.contractNumber = req.contractNumber;
+        c.contractNumber = contractNumber; // 👈 usar el corregido
         c.contractType = req.contractType;
         c.category = req.category;
         c.signDate = req.signDate;
@@ -42,7 +54,7 @@ public class ContractService {
         c.persist();
 
         AuditLog.of(clientId, "CONTRACT", c.id, "CREATE", actor,
-                "{\"contractNumber\":\"" + escape(req.contractNumber) + "\"}"
+                "{\"contractNumber\":\"" + escape(contractNumber) + "\"}"
         ).persist();
 
         return c;
